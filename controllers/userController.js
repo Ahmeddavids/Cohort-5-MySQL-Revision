@@ -11,6 +11,7 @@ exports.createUser = async (req, res) => {
         // Check if the user already exists
         const userExists = await User.findOne({ where: { email: email.toLowerCase() } });
         if (userExists) {
+            // Unlink the file from our local storage
             fs.unlinkSync(req.file.path)
             return res.status(400).json({
                 message: `User with email: ${email} already exists`
@@ -29,7 +30,7 @@ exports.createUser = async (req, res) => {
                 return data
             }
         });
-
+        // Unlink the file from our local storage
         fs.unlinkSync(req.file.path);
 
         // Create the user details
@@ -49,8 +50,17 @@ exports.createUser = async (req, res) => {
 
     } catch (error) {
         if (req.file.path) {
+            // Unlink the file from our local storage
             fs.unlinkSync(req.file.path)
         }
+        res.status(500).json({ message: 'Error creating User: ' + error.message })
+    }
+}
+
+exports.login = async (req, res) => {
+    try {
+        // 
+    } catch (error) {
         res.status(500).json({ message: 'Error creating User: ' + error.message })
     }
 }
