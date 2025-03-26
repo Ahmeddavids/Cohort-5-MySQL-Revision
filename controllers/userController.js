@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const SECRET_KEY = process.env.JWT_SECRET
 
 exports.createUser = async (req, res) => {
     try {
@@ -59,7 +60,30 @@ exports.createUser = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        // 
+        // Extract the User's Email and Password
+        const { email, password } = req.body;
+        // Find the user and check if they exist.
+        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            })
+        };
+        // Check if the user is paassing the right password
+        const correctPassword = await bcrypt.compare(password, user.password);
+        if (correctPassword === false) {
+            return res.status(404).json({
+                message: 'Incorrect Credentials'
+            })
+        };
+        // Generate a token for the user on login
+        const token = await jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1day' });
+        // Send a success response
+        res.status(200).json({
+            message: 'Login successful',
+            data: user,
+            token
+        })
     } catch (error) {
         res.status(500).json({ message: 'Error creating User: ' + error.message })
     }
