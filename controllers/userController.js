@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const { isAdmin } = require('../middlewares/authentication');
 const SECRET_KEY = process.env.JWT_SECRET
 
 exports.createUser = async (req, res) => {
@@ -77,7 +78,7 @@ exports.login = async (req, res) => {
             })
         };
         // Generate a token for the user on login
-        const token = await jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1day' });
+        const token = await jwt.sign({ userId: user.id, isAdmin: user.isAdmin }, SECRET_KEY, { expiresIn: '1day' });
         // Send a success response
         res.status(200).json({
             message: 'Login successful',
@@ -86,5 +87,34 @@ exports.login = async (req, res) => {
         })
     } catch (error) {
         res.status(500).json({ message: 'Error creating User: ' + error.message })
+    }
+}
+
+exports.makeAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            })
+        }
+
+        if (user.isAdmin == true) {
+            return res.status(400).json({
+                message: 'User already an Admin'
+            })
+        }
+        const admin = await User.update({ isAdmin: true }, { where: { id: id } });
+        // console.log(admin)
+        // user.gender = 'Male';
+        // await user.save()
+        res.status(200).json({
+            message: 'User is now an Admin',
+            data: admin
+        })
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error making User an Admin: ' + error.message })
     }
 }
