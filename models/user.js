@@ -29,6 +29,14 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false
     },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
     gender: {
       type: DataTypes.ENUM('Male', 'Female'),
       allowNull: false
@@ -50,7 +58,7 @@ User.init(
   },
 );
 
-Library.belongsTo(User, { foreignKey: 'userId', as: 'Libraries' });
-User.hasMany(Library, { foreignKey: 'id', as: 'User' });
+User.hasMany(Library, { foreignKey: 'userId', as: 'libraries' });
+Library.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 module.exports = User;
