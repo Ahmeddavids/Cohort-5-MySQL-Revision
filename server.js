@@ -1,12 +1,14 @@
 const express = require('express');
 const sequelize = require('./database/sequelize');
 const userRouter = require('./routes/userRouter');
+const libraryRouter = require('./routes/libraryRouter');
 
 const PORT = 1042;
 const app = express();
 app.use(express.json());
 
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/book', libraryRouter);
 
 app.use('/', (req, res) => {
     res.send('Welcome Cohort 5 revision Class')
